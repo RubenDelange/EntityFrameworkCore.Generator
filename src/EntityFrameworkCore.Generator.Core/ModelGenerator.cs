@@ -63,7 +63,15 @@ namespace EntityFrameworkCore.Generator
             {
                 _logger.LogDebug($"  Processing Table : {t.Name}");
 
+                if (IsTableIgnored(t.Name))
+                {
+                    _logger.LogDebug($"  Table {t.Name} is ignored");
+
+                    continue;
+                }
+
                 var entity = GetEntity(entityContext, t);
+
                 GetModels(entity);
             }
 
@@ -133,6 +141,9 @@ namespace EntityFrameworkCore.Generator
         {
             foreach (var column in columns)
             {
+                if (IsPropertyIgnored(column.Name))
+                    continue;
+
                 var table = column.Table;
                 var property = entity.Properties.ByColumn(column.Name);
 
@@ -444,6 +455,9 @@ namespace EntityFrameworkCore.Generator
 
             foreach (var member in members)
             {
+                if (IsPropertyIgnored(member.Name))
+                    continue;
+
                 var property = entity.Properties.ByColumn(member.Name);
 
                 if (property == null)
@@ -579,6 +593,41 @@ namespace EntityFrameworkCore.Generator
             return legalName;
         }
 
+        private bool IsTableIgnored(string tableName)
+        {
+            var options = _options.Data.Entity;
+
+            var includeExpressions = new HashSet<string>(options.Include.Entities);
+            var excludeExpressions = new HashSet<string>(options.Exclude.Entities);
+
+            var includeEntities = options.Include?.Entities ?? Enumerable.Empty<string>();
+            foreach (var expression in includeEntities)
+                includeExpressions.Add(expression);
+
+            var excludeEntities = options.Exclude?.Entities ?? Enumerable.Empty<string>();
+            foreach (var expression in excludeEntities)
+                excludeExpressions.Add(expression);
+
+            return IsIgnored(tableName, excludeExpressions, includeExpressions);
+        }
+
+        private bool IsPropertyIgnored(string propertyName)
+        {
+            var options = _options.Data.Entity;
+
+            var excludeExpressions = new HashSet<string>(options.Exclude.Properties);
+            var includeExpressions = new HashSet<string>(options.Include.Properties);
+
+            var includeProperties = options.Include?.Properties ?? Enumerable.Empty<string>();
+            foreach (var expression in includeProperties)
+                includeExpressions.Add(expression);
+
+            var excludeProperties = options.Exclude?.Properties ?? Enumerable.Empty<string>();
+            foreach (var expression in excludeProperties)
+                excludeExpressions.Add(expression);
+
+            return IsIgnored(propertyName, excludeExpressions, includeExpressions);
+        }
 
         private static bool IsIgnored<TOption>(Property property, TOption options, SharedModelOptions sharedOptions)
             where TOption : ModelOptionsBase

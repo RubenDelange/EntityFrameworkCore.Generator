@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace EntityFrameworkCore.Generator.Options
 {
@@ -21,6 +20,11 @@ namespace EntityFrameworkCore.Generator.Options
             RelationshipNaming = RelationshipNaming.Plural;
             EntityNaming = EntityNaming.Singular;
             PrefixWithSchemaName = false;
+            AddIgnoreMapAttributeOnChildren = true;
+            AddReadOnlyIdProperty = false;
+
+            Include = new SelectionOptions();
+            Exclude = new SelectionOptions();
         }
 
         /// <summary>
@@ -58,5 +62,38 @@ namespace EntityFrameworkCore.Generator.Options
         /// </summary>
         [DefaultValue(false)]
         public bool PrefixWithSchemaName { get; set; }
+
+        /// <summary>
+        /// Additional using statements, ;-separated - example: MyLib;MyLib.Data;MyLib.Domain
+        /// </summary>
+        public string AdditionalUsings { get; set; }
+
+        /// <summary>
+        /// If true, [IgnoreMap] will be set on each child attribute (1-1 and 1-n relations)
+        /// </summary>
+        [DefaultValue(true)]
+        public bool AddIgnoreMapAttributeOnChildren { get; set; }
+
+        /// <summary>
+        /// If true, a property public Guid Id => {EntityClassName}Id; will be added
+        /// </summary>
+        [DefaultValue(false)]
+        public bool AddReadOnlyIdProperty { get; set; }
+
+        /// <summary>
+        /// Gets or sets the include selection options.
+        /// </summary>
+        /// <value>
+        /// The include selection options.
+        /// </value>
+        public SelectionOptions Include { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exclude selection options.
+        /// </summary>
+        /// <value>
+        /// The exclude selection options.
+        /// </value>
+        public SelectionOptions Exclude { get; set; }
     }
 }

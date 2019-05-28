@@ -20,6 +20,28 @@ namespace EntityFrameworkCore.Generator.Templates
 
             CodeBuilder.AppendLine("using System;");
             CodeBuilder.AppendLine("using System.Collections.Generic;");
+
+            if (!Options.Data.Entity.AdditionalUsings.IsNullOrWhiteSpace())
+            {
+                var splittedUsings = Options.Data.Entity.AdditionalUsings
+                    .Split(';')
+                    .Distinct()
+                    .Where(s => !s.IsNullOrWhiteSpace());
+
+                if (splittedUsings.Any())
+                {
+                    foreach(var splittedUsing in splittedUsings)
+                    {
+                        CodeBuilder.AppendLine($"using {splittedUsing};");
+                    }
+                }
+            }
+
+            if (Options.Data.Entity.AddIgnoreMapAttributeOnChildren)
+            {
+                CodeBuilder.AppendLine("using AutoMapper;");
+            }
+
             CodeBuilder.AppendLine();
 
             CodeBuilder.AppendLine($"namespace {_entity.EntityNamespace}");
@@ -108,11 +130,25 @@ namespace EntityFrameworkCore.Generator.Templates
         private void GenerateProperties()
         {
             CodeBuilder.AppendLine("#region Generated Properties");
+
+            if (Options.Data.Entity.AddReadOnlyIdProperty)
+            {
+                var primaryKeyProperty = _entity.Properties.FirstOrDefault(p => p.IsPrimaryKey.HasValue && p.IsPrimaryKey.Value);
+
+                if (primaryKeyProperty != null)
+                {
+                    var primaryKeyPropertyName = primaryKeyProperty.PropertyName.ToSafeName();
+
+                    CodeBuilder.AppendLine($"public Guid Id => {primaryKeyPropertyName};");
+                    CodeBuilder.AppendLine();
+                }
+            }
+
             foreach (var property in _entity.Properties)
             {
                 var propertyType = property.SystemType.ToNullableType(property.IsNullable == true);
                 var propertyName = property.PropertyName.ToSafeName();
-
+                
                 if (Options.Data.Entity.Document)
                 {
                     CodeBuilder.AppendLine("/// <summary>");
@@ -150,6 +186,11 @@ namespace EntityFrameworkCore.Generator.Templates
                         CodeBuilder.AppendLine("/// </value>");
                     }
 
+                    if (Options.Data.Entity.AddIgnoreMapAttributeOnChildren)
+                    {
+                        CodeBuilder.AppendLine("[IgnoreMap]");
+                    }
+
                     CodeBuilder.AppendLine($"public virtual ICollection<{primaryName}> {propertyName} {{ get; set; }}");
                     CodeBuilder.AppendLine();
                 }
@@ -166,6 +207,11 @@ namespace EntityFrameworkCore.Generator.Templates
 
                         foreach (var property in relationship.Properties)
                             CodeBuilder.AppendLine($"/// <seealso cref=\"{property.PropertyName}\" />");
+                    }
+
+                    if (Options.Data.Entity.AddIgnoreMapAttributeOnChildren)
+                    {
+                        CodeBuilder.AppendLine("[IgnoreMap]");
                     }
 
                     CodeBuilder.AppendLine($"public virtual {primaryName} {propertyName} {{ get; set; }}");
