@@ -87,6 +87,9 @@ namespace EntityFrameworkCore.Generator
 
         private void GenerateMappingClasses(EntityContext entityContext)
         {
+            if (!Options.Data.Mapping.Generate)
+                return;
+
             foreach (var entity in entityContext.Entities)
             {
                 var directory = Options.Data.Mapping.Directory;
