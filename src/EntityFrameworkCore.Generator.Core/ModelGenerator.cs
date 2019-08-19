@@ -176,6 +176,9 @@ namespace EntityFrameworkCore.Generator
                 property.Default = column.DefaultValueSql;
                 property.ValueGenerated = column.ValueGenerated;
 
+                if (property.ValueGenerated == null && !string.IsNullOrWhiteSpace(column.ComputedColumnSql))
+                    property.ValueGenerated = ValueGenerated.OnAddOrUpdate;
+
                 var mapping = _typeMapper.ParseType(column.StoreType);
                 property.StoreType = mapping.StoreType;
                 property.NativeType = mapping.NativeType;
