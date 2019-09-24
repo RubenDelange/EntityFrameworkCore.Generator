@@ -14,7 +14,7 @@ namespace EntityFrameworkCore.Generator.Options
         public MappingClassOptions(VariableDictionary variables, string prefix)
             : base(variables, AppendPrefix(prefix, "Mapping"))
         {
-            Generate = false;
+            Generate = true;
             Namespace = "{Project.Namespace}.Data.Mapping";
             Directory = @"{Project.Directory}\Data\Mapping";
         }

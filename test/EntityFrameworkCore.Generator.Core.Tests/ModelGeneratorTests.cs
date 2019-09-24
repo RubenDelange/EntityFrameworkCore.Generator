@@ -20,31 +20,8 @@ namespace EntityFrameworkCore.Generator.Core.Tests
                 DatabaseName = "TestDatabase",
                 DefaultSchema = "dbo"
             };
-            var testTable = new DatabaseTable
-            {
-                Database = databaseModel,
-                Name = "TestTable",
-                Schema = "dbo"
-            };
-            databaseModel.Tables.Add(testTable);
+            var testTable = GenerateDatabaseTable("TestTable", databaseModel);
 
-            var identifierColumn = new DatabaseColumn
-            {
-                Table = testTable,
-                Name = "Id",
-                IsNullable = false,
-                StoreType = "int"
-            };
-            testTable.Columns.Add(identifierColumn);
-
-            var nameColumn = new DatabaseColumn
-            {
-                Table = testTable,
-                Name = "Name",
-                IsNullable = true,
-                StoreType = "varchar(50)"
-            };
-            testTable.Columns.Add(nameColumn);
             var generator = new ModelGenerator(NullLoggerFactory.Instance);
 
             var result = generator.Generate(generatorOptions, databaseModel);
@@ -86,31 +63,7 @@ namespace EntityFrameworkCore.Generator.Core.Tests
                 DatabaseName = "TestDatabase",
                 DefaultSchema = "dbo"
             };
-            var testTable = new DatabaseTable
-            {
-                Database = databaseModel,
-                Name = "TestTable",
-                Schema = "dbo"
-            };
-            databaseModel.Tables.Add(testTable);
-
-            var identifierColumn = new DatabaseColumn
-            {
-                Table = testTable,
-                Name = "Id",
-                IsNullable = false,
-                StoreType = "int"
-            };
-            testTable.Columns.Add(identifierColumn);
-
-            var nameColumn = new DatabaseColumn
-            {
-                Table = testTable,
-                Name = "Name",
-                IsNullable = true,
-                StoreType = "varchar(50)"
-            };
-            testTable.Columns.Add(nameColumn);
+            var testTable = GenerateDatabaseTable("TestTable", databaseModel);
             var generator = new ModelGenerator(NullLoggerFactory.Instance);
 
             var result = generator.Generate(generatorOptions, databaseModel);
@@ -439,6 +392,150 @@ create default abc0 as 0
 
         }
 
+        [Fact]
+        public void GenerateMultipleEntities()
+        {
+            var databaseModel = new DatabaseModel
+            {
+                DatabaseName = "TestDatabase",
+                DefaultSchema = "dbo"
+            };
+
+            var testTable = GenerateDatabaseTable("TestTable", databaseModel);
+            var otherTable = GenerateDatabaseTable("OtherTable", databaseModel);
+
+            var generatorOptions = new GeneratorOptions();
+
+            var generator = new ModelGenerator(NullLoggerFactory.Instance);
+
+            var result = generator.Generate(generatorOptions, databaseModel);
+            result.ContextClass.Should().Be("TestDatabaseContext");
+            result.ContextNamespace.Should().Be("TestDatabase.Data");
+            result.Entities.Count.Should().Be(2);
+        }
+
+        [Fact]
+        public void GenerateIncludeEntities()
+        {
+            var databaseModel = new DatabaseModel
+            {
+                DatabaseName = "TestDatabase",
+                DefaultSchema = "dbo"
+            };
+
+            var testTable = GenerateDatabaseTable("TestTable", databaseModel);
+            var otherTable = GenerateDatabaseTable("OtherTable", databaseModel);
+
+            var generatorOptions = new GeneratorOptions();
+            generatorOptions.Data.Entity.Include.Entities = new List<string> {"TestTable"};
+
+            var generator = new ModelGenerator(NullLoggerFactory.Instance);
+
+            var result = generator.Generate(generatorOptions, databaseModel);
+            result.ContextClass.Should().Be("TestDatabaseContext");
+            result.ContextNamespace.Should().Be("TestDatabase.Data");
+            result.Entities.Count.Should().Be(1);
+
+            var firstEntity = result.Entities[0];
+            firstEntity.TableName.Should().Be("TestTable");
+            firstEntity.TableSchema.Should().Be("dbo");
+            firstEntity.EntityClass.Should().Be("TestTable");
+            firstEntity.EntityNamespace.Should().Be("TestDatabase.Data.Entities");
+            firstEntity.MappingClass.Should().Be("TestTableMap");
+            firstEntity.MappingNamespace.Should().Be("TestDatabase.Data.Mapping");
+        }
+
+        [Fact]
+        public void GenerateExcludeEntities()
+        {
+            var databaseModel = new DatabaseModel
+            {
+                DatabaseName = "TestDatabase",
+                DefaultSchema = "dbo"
+            };
+
+            var testTable = GenerateDatabaseTable("TestTable", databaseModel);
+            var otherTable = GenerateDatabaseTable("OtherTable", databaseModel);
+            var anotherTable = GenerateDatabaseTable("AnotherTable", databaseModel);
+
+            var generatorOptions = new GeneratorOptions();
+            generatorOptions.Data.Entity.Exclude.Entities = new List<string> {"OtherTable"};
+
+            var generator = new ModelGenerator(NullLoggerFactory.Instance);
+
+            var result = generator.Generate(generatorOptions, databaseModel);
+            result.ContextClass.Should().Be("TestDatabaseContext");
+            result.ContextNamespace.Should().Be("TestDatabase.Data");
+            result.Entities.Count.Should().Be(2);
+
+            foreach (var entity in result.Entities)
+            {
+                entity.TableName.Should().NotBe("OtherTable");
+            }
+        }
+
+        [Fact]
+        public void GenerateIncludeExcludeEntities()
+        {
+            var databaseModel = new DatabaseModel
+            {
+                DatabaseName = "TestDatabase",
+                DefaultSchema = "dbo"
+            };
+
+            var testTable = GenerateDatabaseTable("TestTable", databaseModel);
+            var otherTable = GenerateDatabaseTable("OtherTable", databaseModel);
+            var anotherTable = GenerateDatabaseTable("AnotherTable", databaseModel);
+
+            var generatorOptions = new GeneratorOptions();
+            generatorOptions.Data.Entity.Include.Entities = new List<string> {"TestTable"};
+            generatorOptions.Data.Entity.Exclude.Entities = new List<string> {"OtherTable"};
+
+            var generator = new ModelGenerator(NullLoggerFactory.Instance);
+
+            var result = generator.Generate(generatorOptions, databaseModel);
+            result.ContextClass.Should().Be("TestDatabaseContext");
+            result.ContextNamespace.Should().Be("TestDatabase.Data");
+            result.Entities.Count.Should().Be(1);
+
+            var firstEntity = result.Entities[0];
+            firstEntity.TableName.Should().Be("TestTable");
+            firstEntity.TableSchema.Should().Be("dbo");
+            firstEntity.EntityClass.Should().Be("TestTable");
+            firstEntity.EntityNamespace.Should().Be("TestDatabase.Data.Entities");
+            firstEntity.MappingClass.Should().Be("TestTableMap");
+            firstEntity.MappingNamespace.Should().Be("TestDatabase.Data.Mapping");
+        }
+
+        private DatabaseTable GenerateDatabaseTable(string tableName, DatabaseModel databaseModel)
+        {
+            var testTable = new DatabaseTable
+            {
+                Database = databaseModel,
+                Name = tableName,
+                Schema = "dbo"
+            };
+            databaseModel.Tables.Add(testTable);
+
+            var identifierColumn = new DatabaseColumn
+            {
+                Table = testTable,
+                Name = "Id",
+                IsNullable = false,
+                StoreType = "int"
+            };
+            testTable.Columns.Add(identifierColumn);
+
+            var nameColumn = new DatabaseColumn
+            {
+                Table = testTable,
+                Name = "Name",
+                IsNullable = true,
+                StoreType = "varchar(50)"
+            };
+            testTable.Columns.Add(nameColumn);
+
+            return testTable;
+        }
     }
 }
-

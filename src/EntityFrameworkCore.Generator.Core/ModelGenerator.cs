@@ -672,6 +672,9 @@ namespace EntityFrameworkCore.Generator
 
         private static bool IsIgnored(string name, IEnumerable<string> excludeExpressions, IEnumerable<string> includeExpressions)
         {
+            if (!includeExpressions.Any() && !excludeExpressions.Any())
+                return false;
+            
             foreach (var expression in includeExpressions)
                 if (Regex.IsMatch(name, expression))
                     return false;
@@ -679,6 +682,13 @@ namespace EntityFrameworkCore.Generator
             foreach (var expression in excludeExpressions)
                 if (Regex.IsMatch(name, expression))
                     return true;
+
+            //name not found in both expressions
+            //if include expression is filled in, we expect explicit behavior
+            if (includeExpressions.Any())
+            {
+                return true;
+            }
 
             return false;
         }
