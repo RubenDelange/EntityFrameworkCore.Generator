@@ -251,7 +251,14 @@ namespace EntityFrameworkCore.Generator
             _logger.LogInformation("Loading database model ...");
 
             var database = Options.Database;
+
+            //do not evaluate connection string resolving (cfr. { or } in password => crash)
+            var shouldEvaluate = Options.Variables.ShouldEvaluate;
+            Options.Variables.ShouldEvaluate = false;
+
             var connectionString = ResolveConnectionString(database);
+
+            Options.Variables.ShouldEvaluate = shouldEvaluate;
 
             return factory.Create(connectionString, database.Tables, database.Schemas);
         }
