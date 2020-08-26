@@ -10,6 +10,7 @@ pages:
 - Database Providers: providers.md
 - Regeneration: regeneration.md
 - Generation Configuration: configuration.md
+- Configuration Variables: variables.md
 - Command Line Reference: commands.md
 
 - EntityFramework Templates:
@@ -26,3 +27,4 @@ pages:
     - Validation: md/validation.md
     - Object Mapper: md/mapper.md
 
+- Script Templates: scripts.md

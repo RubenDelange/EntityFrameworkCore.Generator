@@ -27,7 +27,6 @@ namespace EntityFrameworkCore.Generator
         [Option("--name <ConnectionName>", Description = "The user secret configuration name")]
         public string ConnectionName { get; set; }
 
-
         protected override int OnExecute(CommandLineApplication application)
         {
             var workingDirectory = WorkingDirectory ?? Environment.CurrentDirectory;
@@ -58,10 +57,13 @@ namespace EntityFrameworkCore.Generator
                 options.Database.Provider = Provider.Value;
 
             if (ConnectionString.HasValue())
-                options = CreateUserSecret(options);
-
-
-
+            {
+                if (UserSecretsId.HasValue())
+                    options = CreateUserSecret(options);
+                else
+                    options.Database.ConnectionString = ConnectionString;
+            }
+            
             Serializer.Save(options, workingDirectory, optionsFile);
 
             return 0;
@@ -89,10 +91,6 @@ namespace EntityFrameworkCore.Generator
         {
             var options = new GeneratorOptions();
 
-            // set user secret values
-            options.Database.UserSecretsId = Guid.NewGuid().ToString();
-            options.Database.ConnectionName = "ConnectionStrings:Generator";
-
             // default all to generate
             options.Data.Query.Generate = true;
             options.Model.Read.Generate = true;
@@ -104,6 +102,7 @@ namespace EntityFrameworkCore.Generator
             // null out collection for cleaner yaml file
             options.Database.Tables = null;
             options.Database.Schemas = null;
+            options.Database.Exclude = null;
             options.Model.Shared.Include = null;
             options.Model.Shared.Exclude = null;
             options.Model.Read.Include = null;
@@ -112,6 +111,8 @@ namespace EntityFrameworkCore.Generator
             options.Model.Create.Exclude = null;
             options.Model.Update.Include = null;
             options.Model.Update.Exclude = null;
+
+            options.Script = null;
 
             Logger.LogInformation($"Creating options file: {optionsFile}");
 

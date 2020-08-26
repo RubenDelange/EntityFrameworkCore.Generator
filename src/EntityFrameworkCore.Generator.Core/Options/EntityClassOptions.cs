@@ -29,6 +29,18 @@ namespace EntityFrameworkCore.Generator.Options
         }
 
         /// <summary>
+        /// Gets or sets the entity class name template.
+        /// </summary>
+        /// <value>
+        /// The entity class name template.
+        /// </value>
+        public string Name
+        {
+            get => GetProperty();
+            set => SetProperty(value);
+        }
+
+        /// <summary>
         /// Gets or sets the base class to inherit from.
         /// </summary>
         /// <value>

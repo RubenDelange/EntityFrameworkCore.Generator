@@ -132,9 +132,14 @@ namespace EntityFrameworkCore.Generator.Templates
                 foreach (var relationship in relationships)
                 {
                     var propertyName = relationship.PropertyName.ToSafeName();
-                    var primaryName = relationship.PrimaryEntity.EntityClass.ToSafeName();
 
-                    CodeBuilder.AppendLine($"{propertyName} = new HashSet<{primaryName}>();");
+                    var primaryNamespace = relationship.PrimaryEntity.EntityNamespace;
+                    var primaryName = relationship.PrimaryEntity.EntityClass.ToSafeName();
+                    var primaryFullName = _entity.EntityNamespace != primaryNamespace
+                        ? $"{primaryNamespace}.{primaryName}"
+                        : primaryName;
+
+                    CodeBuilder.AppendLine($"{propertyName} = new HashSet<{primaryFullName}>();");
                 }
                 CodeBuilder.AppendLine("#endregion");
             }
@@ -188,17 +193,21 @@ namespace EntityFrameworkCore.Generator.Templates
             foreach (var relationship in _entity.Relationships.OrderBy(r => r.PropertyName))
             {
                 var propertyName = relationship.PropertyName.ToSafeName();
+                var primaryNamespace = relationship.PrimaryEntity.EntityNamespace;
                 var primaryName = relationship.PrimaryEntity.EntityClass.ToSafeName();
+                var primaryFullName = _entity.EntityNamespace != primaryNamespace
+                    ? $"{primaryNamespace}.{primaryName}"
+                    : primaryName;
 
                 if (relationship.Cardinality == Cardinality.Many)
                 {
                     if (Options.Data.Entity.Document)
                     {
                         CodeBuilder.AppendLine("/// <summary>");
-                        CodeBuilder.AppendLine($"/// Gets or sets the navigation collection for entity <see cref=\"{primaryName}\" />.");
+                        CodeBuilder.AppendLine($"/// Gets or sets the navigation collection for entity <see cref=\"{primaryFullName}\" />.");
                         CodeBuilder.AppendLine("/// </summary>");
                         CodeBuilder.AppendLine("/// <value>");
-                        CodeBuilder.AppendLine($"/// The the navigation collection for entity <see cref=\"{primaryName}\" />.");
+                        CodeBuilder.AppendLine($"/// The the navigation collection for entity <see cref=\"{primaryFullName}\" />.");
                         CodeBuilder.AppendLine("/// </value>");
                     }
 
@@ -207,7 +216,7 @@ namespace EntityFrameworkCore.Generator.Templates
                         CodeBuilder.AppendLine("[IgnoreMap]");
                     }
 
-                    CodeBuilder.AppendLine($"public virtual ICollection<{primaryName}> {propertyName} {{ get; set; }}");
+                    CodeBuilder.AppendLine($"public virtual ICollection<{primaryFullName}> {propertyName} {{ get; set; }}");
                     CodeBuilder.AppendLine();
                 }
                 else
@@ -215,10 +224,10 @@ namespace EntityFrameworkCore.Generator.Templates
                     if (Options.Data.Entity.Document)
                     {
                         CodeBuilder.AppendLine("/// <summary>");
-                        CodeBuilder.AppendLine($"/// Gets or sets the navigation property for entity <see cref=\"{primaryName}\" />.");
+                        CodeBuilder.AppendLine($"/// Gets or sets the navigation property for entity <see cref=\"{primaryFullName}\" />.");
                         CodeBuilder.AppendLine("/// </summary>");
                         CodeBuilder.AppendLine("/// <value>");
-                        CodeBuilder.AppendLine($"/// The the navigation property for entity <see cref=\"{primaryName}\" />.");
+                        CodeBuilder.AppendLine($"/// The the navigation property for entity <see cref=\"{primaryFullName}\" />.");
                         CodeBuilder.AppendLine("/// </value>");
 
                         foreach (var property in relationship.Properties)
@@ -230,7 +239,7 @@ namespace EntityFrameworkCore.Generator.Templates
                         CodeBuilder.AppendLine("[IgnoreMap]");
                     }
 
-                    CodeBuilder.AppendLine($"public virtual {primaryName} {propertyName} {{ get; set; }}");
+                    CodeBuilder.AppendLine($"public virtual {primaryFullName} {propertyName} {{ get; set; }}");
                     CodeBuilder.AppendLine();
                 }
             }

@@ -123,9 +123,9 @@ In order to capture and preserve Entity, Property and DbContext renames, the `ge
 Entity Framework Core Generator supports the following databases.
 
 - SQL Server
-- PostgreSQL *Coming Soon*
-- MySQL *Coming Soon*
-- Sqlite *Coming Soon*
+- PostgreSQL
+- MySQL
+- Sqlite
 
 The provider can be set via command line or via the [configuration file](https://efg.loresoft.com/en/latest/configuration/).
 
@@ -152,6 +152,32 @@ The database schema is loaded from the metadata model factory implementation of 
 Entity Framework Core Generator supports generating [Read](https://efg.loresoft.com/en/latest/md/read/), [Create](https://efg.loresoft.com/en/latest/md/create/) and [Update](https://efg.loresoft.com/en/latest/md/update/) view models from an entity.  Many projects rely on view models to shape data.  The model templates can be used to quickly get the basic view models created.  The model templates also support regeneration so any database change can easily be sync'd to the view models.  
 
 ## Change Log
+
+### Version 3.1
+
+- Breaking change to generated mapping constants
+  - `TableName` is now `Table.Name`
+  - `TableSchema` is now `Table.Schema`
+  - `Column{Name}` is now `Columns.{Name}`
+- add additional automapper for read model to update model
+
+### Version 3.0
+
+- Add `Table.Name` and `Table.Schema` variable support in yaml configuration.
+- Add entity name option to control the name of the entity.  Leave blank to use previous generate logic. Set under the entity -> name yaml settings.
+- Add exclude table support.  Set under the database -> exclude yaml settings.
+- Include and Exclude expression can now be `exact` or `regex`.  When exact, will be direct string match.  When regex, will use regular expression to match. Default is regex for legacy support.
+
+### Version 2.5
+
+- Add external script template support
+- Misc bug fixes
+
+### Version 2.0
+
+- Add support for Entity Framework Core 3.0
+- Add provider support for PostgreSQL, MySQL and Sqlite
+- Add View support
 
 ### Version 1.1
 
