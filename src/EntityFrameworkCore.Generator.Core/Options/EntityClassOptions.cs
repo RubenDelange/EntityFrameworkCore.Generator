@@ -95,5 +95,11 @@ namespace EntityFrameworkCore.Generator.Options
         /// The exclude selection options.
         /// </value>
         public SelectionOptions Exclude { get; set; }
+
+        /// <summary>
+        /// If true, the primary key property will have a value generated in the constructor
+        /// </summary>
+        [DefaultValue(false)]
+        public bool GeneratePkValue { get; set; }
     }
 }

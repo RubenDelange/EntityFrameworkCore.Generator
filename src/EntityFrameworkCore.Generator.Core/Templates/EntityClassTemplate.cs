@@ -114,13 +114,18 @@ namespace EntityFrameworkCore.Generator.Templates
             {
                 CodeBuilder.AppendLine("#region Generated Constructor");
 
-                // PK initializer
-                var primaryKeyProperty = _entity.Properties.FirstOrDefault(p => p.IsPrimaryKey.HasValue && p.IsPrimaryKey.Value);
-                if (primaryKeyProperty != null)
+                if (Options.Data.Entity.GeneratePkValue)
                 {
-                    var primaryKeyPropertyName = primaryKeyProperty.PropertyName.ToSafeName();
-                    CodeBuilder.AppendLine($"{primaryKeyPropertyName} = Guid.NewGuid();");
-                    CodeBuilder.AppendLine();
+                    // PK initializer
+                    var primaryKeyProperty = _entity.Properties.FirstOrDefault(p => p.IsPrimaryKey.HasValue && p.IsPrimaryKey.Value);
+
+                    if (primaryKeyProperty != null)
+                    {
+                        var primaryKeyPropertyName = primaryKeyProperty.PropertyName.ToSafeName();
+
+                        CodeBuilder.AppendLine($"{primaryKeyPropertyName} = Guid.NewGuid();");
+                        CodeBuilder.AppendLine();
+                    }
                 }
 
                 // relationships
