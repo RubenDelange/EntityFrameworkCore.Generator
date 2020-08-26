@@ -379,7 +379,7 @@ namespace EntityFrameworkCore.Generator
 
             var options = new DatabaseModelFactoryOptions(database.Tables, database.Schemas);
 
-            return factory.Create(connectionString, database.Tables, database.Schemas);
+            return factory.Create(connectionString, options);
         }
 
         private string ResolveConnectionString(DatabaseOptions database)

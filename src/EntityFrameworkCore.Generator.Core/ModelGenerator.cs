@@ -636,14 +636,14 @@ namespace EntityFrameworkCore.Generator
         {
             var options = _options.Data.Entity;
 
-            var excludeExpressions = new HashSet<string>(options.Exclude.Properties);
-            var includeExpressions = new HashSet<string>(options.Include.Properties);
+            var excludeExpressions = new HashSet<MatchOptions>(options.Exclude.Properties);
+            var includeExpressions = new HashSet<MatchOptions>(options.Include.Properties);
 
-            var includeProperties = options.Include?.Properties ?? Enumerable.Empty<string>();
+            var includeProperties = options.Include?.Properties ?? Enumerable.Empty<MatchOptions>();
             foreach (var expression in includeProperties)
                 includeExpressions.Add(expression);
 
-            var excludeProperties = options.Exclude?.Properties ?? Enumerable.Empty<string>();
+            var excludeProperties = options.Exclude?.Properties ?? Enumerable.Empty<MatchOptions>();
             foreach (var expression in excludeProperties)
                 excludeExpressions.Add(expression);
 
