@@ -22,6 +22,7 @@ namespace EntityFrameworkCore.Generator.Options
             PrefixWithSchemaName = false;
             AddIgnoreMapAttributeOnChildren = true;
             AddReadOnlyIdProperty = false;
+            GeneratePkValue = true;
 
             Include = new SelectionOptions();
             Exclude = new SelectionOptions();
@@ -99,7 +100,7 @@ namespace EntityFrameworkCore.Generator.Options
         /// <summary>
         /// If true, the primary key property will have a value generated in the constructor
         /// </summary>
-        [DefaultValue(false)]
+        [DefaultValue(true)]
         public bool GeneratePkValue { get; set; }
     }
 }
